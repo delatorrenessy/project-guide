@@ -1,5 +1,3 @@
----
-
 ```markdown
 # PHP Website Project with Login, Registration, and Dashboard
 
