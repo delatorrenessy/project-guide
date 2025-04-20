@@ -204,27 +204,18 @@ $user = $result->fetch_assoc();
 <head>
     <title>Dashboard</title>
 </head>
-<body>
+<body style="text-align:center;">
     <h2>Welcome, <?php echo $user['name']; ?>!</h2>
-
-    <div style="background-color:#e0e0e0; padding:10px;">
-        <h3>Welcome Panel</h3>
-        <p>This is a standard dashboard for our website project. You can manage your projects, view the library, and change your password.</p>
-    </div>
-
-    <h3>Project Names</h3>
-    <ul>
-        <li>Library Management System</li>
-        <li>Online Voting System</li>
-        <li>Attendance Tracker</li>
-        <li>Inventory System</li>
-    </ul>
-
     <nav>
         <a href="library.php">Library</a> |
         <a href="changepassword.php">Change Password</a> |
         <a href="logout.php">Logout</a>
     </nav>
+    <div style="background-color:#e0e0e0; padding:10px;">
+        <h1>Online Bookstore Management System</h1>
+        <h3>Welcome Panel</h3>
+        <p>This is a standard dashboard for our website project. You can manage your projects, view the library, and change your password.</p>
+    </div>
 </body>
 </html>
 ```
