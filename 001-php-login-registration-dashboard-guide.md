@@ -11,7 +11,7 @@ This project is a simple PHP website that includes:
 
 ## 📁 Project Structure
 
-```
+
 my_website_project/
 │
 ├── connection.php
@@ -23,7 +23,6 @@ my_website_project/
 ├── logout.php
 └── css/
     └── style.css (optional)
-```
 
 ---
 
