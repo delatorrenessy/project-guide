@@ -21,6 +21,7 @@ my_website_project/
 ├── changepassword.php
 ├── library.php
 ├── logout.php
+├── schema.sql
 └── css/
     └── style.css (optional)
 
