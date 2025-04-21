@@ -31,13 +31,13 @@ my_website_project/
 ### 1. Create a Database
 
 ```sql
-CREATE DATABASE website_db;
+CREATE DATABASE db_lastname_project;
 ```
 
 ### 2. Use the Database
 
 ```sql
-USE website_db;
+USE db_lastname_project;
 ```
 
 ### 3. Create the `Users` Table
@@ -61,8 +61,8 @@ CREATE TABLE Users (
 <?php
 $servername = "localhost";
 $username = "root";
-$password = ""; // your MySQL password
-$database = "website_db";
+$password = ""; // your MySQL password if applicable
+$database = "db_lastname_project";
 
 $conn = new mysqli($servername, $username, $password, $database);
 
