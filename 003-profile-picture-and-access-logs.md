@@ -51,6 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </form>
 ```
 
+---
+
 ### ✅ d. Show Picture in Dashboard
 
 In `dashboard.php`:
