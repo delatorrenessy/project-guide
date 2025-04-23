@@ -62,7 +62,7 @@ $_SESSION["role"] = $row['role'];
 ```php
 <?php
 include_once("connection.php");
-include_once("library.php");
+include_once("functions.php");
 
 if (!isAdmin()) {
     header("Location: dashboard.php");
