@@ -20,6 +20,8 @@ ALTER TABLE Users ADD profile_picture VARCHAR(255) DEFAULT 'default.png';
 
 - Make sure it’s **writable** (`chmod 755` or `777` on Linux if needed)
 
+---
+
 ### 📝 c. Update Registration / Profile Page
 
 Create `update_profile.php`:
