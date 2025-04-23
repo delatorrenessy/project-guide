@@ -1,12 +1,20 @@
+# 🚀 Advanced Features for PHP User Management System
+
+This guide expands your existing PHP website to support:
+
+- 🖼️ Profile Pictures
+- 👥 Multiple Roles per User
+- 🕵️‍♂️ Access Logs (e.g., login, role changes)
+
 ---
 
-## 🖼️ 1. Add **Profile Pictures**
+## 🖼️ Profile Picture Upload
 
-### 📌 a. Update Database
+### 1. Update Users Table
 
 ```sql
 ALTER TABLE Users ADD profile_picture VARCHAR(255) DEFAULT 'default.png';
-```
+
 
 ### 📁 b. Create `uploads/` Directory
 
