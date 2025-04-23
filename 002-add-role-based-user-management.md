@@ -126,13 +126,6 @@ Add this to your `dashboard.php` navigation:
 
 ---
 
-### ✅ Final Touches
-
-- ✅ `connection.php` already has session started — perfect!
-- ✅ `logout.php` clears session — good.
-- 🔐 You may want to add a redirect to login if `$_SESSION['role']` isn't set after login (as a safeguard).
-
----
 
 ## 💡 Done!
 
