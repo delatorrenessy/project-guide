@@ -14,7 +14,9 @@ This guide expands your existing PHP website to support:
 
 ```sql
 ALTER TABLE Users ADD profile_picture VARCHAR(255) DEFAULT 'default.png';
+```
 
+---
 
 ### 📁 b. Create `uploads/` Directory
 
