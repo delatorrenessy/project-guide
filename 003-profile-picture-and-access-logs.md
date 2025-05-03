@@ -12,6 +12,8 @@ This guide expands your existing PHP website to support:
 
 ### 1. Update Users Table
 
+Copy the SQL code below and paste it into schema.sql. Then, run the SQL script on your project database using phpMyAdmin.
+
 ```sql
 ALTER TABLE Users ADD profile_picture VARCHAR(255) DEFAULT 'default.png';
 ```
