@@ -22,6 +22,8 @@ ALTER TABLE Users ADD profile_picture VARCHAR(255) DEFAULT 'default.png';
 
 ### 📁 b. Create `uploads/` Directory
 
+Create an uploads folder in your project directory.
+
 - Make sure it’s **writable** (`chmod 755` or `777` on Linux if needed)
 
 ---
@@ -71,6 +73,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 In `dashboard.php`:
 
+At line 12, immediately after the statement $user = $result->fetch_assoc();, insert the following code:
+
 ```php
 $result = $conn->query("SELECT name, profile_picture FROM Users WHERE user_id = $user_id");
 $user = $result->fetch_assoc();
@@ -84,6 +88,8 @@ echo "<img src='uploads/" . $user['profile_picture'] . "' width='100' height='10
 Track user login or actions like role changes.
 
 ### 📌 a. Create `AccessLogs` Table
+
+Copy the SQL code below and paste it into schema.sql. Then, run the SQL script on your project database using phpMyAdmin.
 
 ```sql
 CREATE TABLE AccessLogs (
@@ -99,6 +105,8 @@ CREATE TABLE AccessLogs (
 
 In `functions.php`:
 
+Add the code below.
+
 ```php
 function logAction($conn, $user_id, $action) {
     $stmt = $conn->prepare("INSERT INTO AccessLogs (user_id, action) VALUES (?, ?)");
@@ -109,7 +117,7 @@ function logAction($conn, $user_id, $action) {
 
 ### 📝 c. Log Login & Role Changes
 
-- In `login.php` after successful login:
+- In `login.php`, immediately after a successful login, before the statement `header("Location: dashboard.php");`, add the following code:
 
 ```php
 logAction($conn, $_SESSION['user_id'], "Logged in");
@@ -120,6 +128,8 @@ logAction($conn, $_SESSION['user_id'], "Logged in");
 ```php
 logAction($conn, $_SESSION['user_id'], "Changed role of user ID $user_id to $new_role");
 ```
+
+Ensure that you have added `include_once("functions.php");` immediately after `include_once("connection.php");`  so that the function can be called properly.
 
 ### 📋 d. View Logs (optional)
 
