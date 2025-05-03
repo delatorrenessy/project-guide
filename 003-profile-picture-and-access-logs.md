@@ -81,6 +81,12 @@ $user = $result->fetch_assoc();
 echo "<img src='uploads/" . $user['profile_picture'] . "' width='100' height='100'><br>";
 ```
 
+Below the <a href="changepassword.php">Change Password</a> |, add a new link to update the profile picture:
+
+```
+<a href="update_profile.php">Change Profile</a> |
+```
+
 ---
 
 ## 🕵️‍♂️ 2. Add **Access Logs**
