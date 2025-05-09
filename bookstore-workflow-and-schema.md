@@ -15,7 +15,7 @@
 - User logs in with email and password.
 - System:
   - Verifies credentials.
-  - Starts session or returns JWT.
+  - Starts session.
   - Grants access based on role.
 
 ### c. Browsing Books
