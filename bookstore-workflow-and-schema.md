@@ -63,8 +63,10 @@
 ---
 
 ## 4. 🗄️ Database Schema (SQL)
+---
 
 ### Users
+
 ```sql
 CREATE TABLE Users (
     id INT PRIMARY KEY AUTO_INCREMENT,
