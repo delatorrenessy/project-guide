@@ -63,7 +63,8 @@
 ---
 
 ## 4. 🗄️ Database Schema (SQL)
----
+````
+
 
 ### Users
 
@@ -77,7 +78,7 @@ CREATE TABLE Users (
     role ENUM('customer', 'admin') DEFAULT 'customer',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-````
+```
 
 ### Genres
 
