@@ -85,21 +85,28 @@ $books_result = $conn->query($sql_books);
 
 // Add book to cart
 if (isset($_POST['add_to_cart'])) {
-    $user_id = 1;  // Assume a logged-in user with ID 1 for simplicity
+    $user_id = $_SESSION["user_id"];
     $book_id = $_POST['book_id'];
     $quantity = $_POST['quantity'];
 
+    // Check if the book already exists in the cart
     $sql_check_cart = "SELECT * FROM Cart WHERE user_id = $user_id AND book_id = $book_id";
     $cart_result = $conn->query($sql_check_cart);
 
     if ($cart_result->num_rows > 0) {
+        // If the book is already in the cart, update the quantity
         $sql_update_cart = "UPDATE Cart SET quantity = quantity + $quantity WHERE user_id = $user_id AND book_id = $book_id";
         $conn->query($sql_update_cart);
     } else {
+        // If the book is not in the cart, add it
         $sql_add_to_cart = "INSERT INTO Cart (user_id, book_id, quantity) VALUES ($user_id, $book_id, $quantity)";
         $conn->query($sql_add_to_cart);
     }
 }
+
+// Fetch cart contents to display
+$sql_cart = "SELECT Cart.*, Books.title, Books.price FROM Cart JOIN Books ON Cart.book_id = Books.id WHERE Cart.user_id = 1";
+$cart_result = $conn->query($sql_cart);
 
 // Checkout process: Create order and deduct stock
 if (isset($_POST['checkout'])) {
@@ -112,13 +119,13 @@ if (isset($_POST['checkout'])) {
     $order_id = $conn->insert_id;  // Get the last inserted order ID
 
     // Add order details and update stock
-    $sql_cart_items = "SELECT * FROM Cart WHERE user_id = $user_id";
+    $sql_cart_items = "SELECT Cart.*, Books.price FROM Cart JOIN Books ON Cart.book_id = Books.id WHERE Cart.user_id = $user_id";
     $cart_items = $conn->query($sql_cart_items);
 
     while ($item = $cart_items->fetch_assoc()) {
         $book_id = $item['book_id'];
         $quantity = $item['quantity'];
-        $price = $item['price'];  // You can fetch the price from the Books table
+        $price = $item['price'];
 
         // Add to OrderDetails
         $sql_order_details = "INSERT INTO OrderDetails (order_id, book_id, quantity, price) VALUES ($order_id, $book_id, $quantity, $price)";
@@ -182,14 +189,41 @@ if (isset($_POST['checkout'])) {
 </table>
 
 <h2>Your Cart</h2>
-<!-- Display cart contents here -->
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Total</th>
+    </tr>
+    <?php
+    $cart_total = 0;
+    if ($cart_result->num_rows > 0) {
+        while ($cart_item = $cart_result->fetch_assoc()) {
+            $total_price = $cart_item['quantity'] * $cart_item['price'];
+            $cart_total += $total_price;
+            echo "<tr>
+                    <td>" . $cart_item['title'] . "</td>
+                    <td>" . $cart_item['quantity'] . "</td>
+                    <td>" . $cart_item['price'] . "</td>
+                    <td>" . $total_price . "</td>
+                  </tr>";
+        }
+    } else {
+        echo "<tr><td colspan='4'>Your cart is empty</td></tr>";
+    }
+    ?>
+</table>
 
 <h2>Checkout</h2>
-<!-- Display checkout form here -->
-<form method="POST">
-    <input type="hidden" name="total" value="100.00" />  <!-- Example total -->
-    <button type="submit" name="checkout">Checkout</button>
-</form>
+<?php if ($cart_total > 0): ?>
+    <form method="POST">
+        <input type="hidden" name="total" value="<?php echo $cart_total; ?>" />
+        <button type="submit" name="checkout">Checkout</button>
+    </form>
+<?php else: ?>
+    <p>Your cart is empty. Add some books to the cart to proceed with checkout.</p>
+<?php endif; ?>
 
 </body>
 </html>
@@ -198,6 +232,9 @@ if (isset($_POST['checkout'])) {
 // Close the database connection
 $conn->close();
 ?>
+<br/>
+<a href="dashboard.php">Back to Dashboard</a>
+
 ```
 
 ---
