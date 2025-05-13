@@ -5,6 +5,7 @@ In this guide, you will learn how to create a simple **PHP application** where a
 1. View all orders.
 2. Filter orders by **user**, **date**, or **status**.
 3. See order totals and the details of books in each order.
+4. Update order status
 
 ---
 
@@ -36,55 +37,65 @@ Here is the PHP code that will handle displaying the orders and filtering by dif
 
 ```php
 <?php
-// Database connection settings
+
 include_once("connection.php");
 
-// Admin authentication (simple for demonstration)
-session_start();
-if (!isset($_SESSION['admin_id'])) {
-    die("You must be logged in as an admin to view this page.");
+// Admin check
+if (!isAdmin()) {
+    header("Location: dashboard.php");
+    exit();
 }
 
-// Filtering orders based on user, date, and status
+// Handle status update
+if (isset($_POST['update_status'])) {
+    $order_id = $_POST['order_id'];
+    $new_status = $_POST['status'];
+    $sql_update = "UPDATE Orders SET status = '$new_status' WHERE id = $order_id";
+    $conn->query($sql_update);
+    echo "<p style='color:green;'>Order #$order_id updated to '$new_status'.</p>";
+}
+
+// Filters
 $filter_user = isset($_GET['user_id']) ? $_GET['user_id'] : '';
 $filter_status = isset($_GET['status']) ? $_GET['status'] : '';
 $filter_date = isset($_GET['date']) ? $_GET['date'] : '';
 
-// Query to get orders based on filters
-$sql_orders = "SELECT * FROM Orders WHERE 1=1";
+// Query orders with filters + join Users for customer names
+$sql_orders = "SELECT Orders.*, Users.name AS customer_name 
+               FROM Orders 
+               JOIN Users ON Orders.user_id = Users.user_id 
+               WHERE 1=1";
 
 if ($filter_user) {
-    $sql_orders .= " AND user_id = '$filter_user'";
+    $sql_orders .= " AND Orders.user_id = '$filter_user'";
 }
-
 if ($filter_status) {
-    $sql_orders .= " AND status = '$filter_status'";
+    $sql_orders .= " AND Orders.status = '$filter_status'";
 }
-
 if ($filter_date) {
-    $sql_orders .= " AND DATE(created_at) = '$filter_date'";
+    $sql_orders .= " AND DATE(Orders.created_at) = '$filter_date'";
 }
 
+$sql_orders .= " ORDER BY Orders.created_at DESC";
 $orders_result = $conn->query($sql_orders);
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Order Management</title>
 </head>
 <body>
 
-<h1>Admin Order Management</h1>
+<h1>🛒 Admin Order Management</h1>
+<a href="dashboard.php">← Back to Dashboard</a><br><br>
 
-<!-- Order Filter Form -->
+<!-- 🔍 Filter Form -->
 <h2>Filter Orders</h2>
 <form method="GET">
     <label for="user_id">User ID:</label>
-    <input type="text" id="user_id" name="user_id" value="<?php echo $filter_user; ?>"><br>
+    <input type="text" id="user_id" name="user_id" value="<?php echo htmlspecialchars($filter_user); ?>"><br>
 
     <label for="status">Status:</label>
     <select id="status" name="status">
@@ -95,77 +106,70 @@ $orders_result = $conn->query($sql_orders);
     </select><br>
 
     <label for="date">Order Date:</label>
-    <input type="date" id="date" name="date" value="<?php echo $filter_date; ?>"><br>
+    <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($filter_date); ?>"><br>
 
     <button type="submit">Apply Filter</button>
 </form>
 
+<hr>
+
+<!-- 📋 Orders List -->
 <h2>Orders List</h2>
-
-<!-- Display Orders -->
-<table border="1">
-    <tr>
-        <th>Order ID</th>
-        <th>User ID</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Date</th>
-        <th>Actions</th>
-    </tr>
-    <?php
-    if ($orders_result->num_rows > 0) {
-        while ($order = $orders_result->fetch_assoc()) {
-            echo "<tr><td>" . $order['id'] . "</td><td>" . $order['user_id'] . "</td><td>" . $order['total'] . "</td><td>" . $order['status'] . "</td><td>" . $order['created_at'] . "</td>";
-            echo "<td><a href='?view_order=" . $order['id'] . "'>View Details</a></td></tr>";
-        }
-    } else {
-        echo "<tr><td colspan='6'>No orders found</td></tr>";
-    }
-    ?>
-</table>
-
 <?php
-// If an order is selected to view details
-if (isset($_GET['view_order'])) {
-    $order_id = $_GET['view_order'];
+if ($orders_result->num_rows > 0) {
+    while ($order = $orders_result->fetch_assoc()) {
+        echo "<h3>Order #{$order['id']} - <em>{$order['status']}</em> - by <strong>{$order['customer_name']}</strong> ({$order['created_at']})</h3>";
 
-    // Fetch order details
-    $sql_order_details = "SELECT od.*, b.title, b.author FROM OrderDetails od
-                          JOIN Books b ON od.book_id = b.id WHERE od.order_id = $order_id";
-    $order_details_result = $conn->query($sql_order_details);
+        // ✅ Status update form
+        echo "<form method='POST' style='margin-bottom:10px;'>
+                <input type='hidden' name='order_id' value='{$order['id']}' />
+                <label for='status'>Update Status:</label>
+                <select name='status'>
+                    <option value='pending' " . ($order['status'] == 'pending' ? 'selected' : '') . ">Pending</option>
+                    <option value='completed' " . ($order['status'] == 'completed' ? 'selected' : '') . ">Completed</option>
+                    <option value='cancelled' " . ($order['status'] == 'cancelled' ? 'selected' : '') . ">Cancelled</option>
+                </select>
+                <button type='submit' name='update_status'>Update</button>
+              </form>";
 
-    echo "<h2>Order Details (Order ID: $order_id)</h2>";
-    echo "<table border='1'>
-            <tr>
-                <th>Book Title</th>
-                <th>Author</th>
-                <th>Quantity</th>
-                <th>Price</th>
-            </tr>";
+        // 📦 Order item details
+        $order_id = $order['id'];
+        $sql_items = "SELECT OrderDetails.*, Books.title, Books.author 
+                      FROM OrderDetails 
+                      JOIN Books ON OrderDetails.book_id = Books.id 
+                      WHERE OrderDetails.order_id = $order_id";
+        $result_items = $conn->query($sql_items);
 
-    if ($order_details_result->num_rows > 0) {
-        while ($detail = $order_details_result->fetch_assoc()) {
-            echo "<tr>
-                    <td>" . $detail['title'] . "</td>
-                    <td>" . $detail['author'] . "</td>
-                    <td>" . $detail['quantity'] . "</td>
-                    <td>" . $detail['price'] . "</td>
-                  </tr>";
+        echo "<table border='1' cellpadding='5'>
+                <tr><th>Book Title</th><th>Author</th><th>Quantity</th><th>Price</th><th>Total</th></tr>";
+        $order_total = 0;
+        if ($result_items->num_rows > 0) {
+            while ($item = $result_items->fetch_assoc()) {
+                $item_total = $item['quantity'] * $item['price'];
+                $order_total += $item_total;
+                echo "<tr>
+                        <td>{$item['title']}</td>
+                        <td>{$item['author']}</td>
+                        <td>{$item['quantity']}</td>
+                        <td>₱{$item['price']}</td>
+                        <td>₱{$item_total}</td>
+                      </tr>";
+            }
+        } else {
+            echo "<tr><td colspan='5'>No book items found</td></tr>";
         }
-        echo "</table>";
-    } else {
-        echo "<tr><td colspan='4'>No book details found</td></tr></table>";
+        echo "<tr><td colspan='4'><strong>Total</strong></td><td><strong>₱$order_total</strong></td></tr>";
+        echo "</table><hr>";
     }
+} else {
+    echo "<p>No orders found.</p>";
 }
+
+$conn->close();
 ?>
 
 </body>
 </html>
-
-<?php
-// Close the database connection
-$conn->close();
-?>
 ```
 
 ---
